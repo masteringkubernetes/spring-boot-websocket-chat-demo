@@ -1,0 +1,77 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chat
+  labels:
+    name: chat-server
+
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: chat-server
+  namespace: chat
+  labels:
+    app: chat-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-server
+  template:
+    metadata:
+      labels:
+        app: chat-server
+    spec:
+      containers:
+      - name: chat-server
+        image: emcconne/spring-boot-websocket-chat-demo:1.0
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: 8080 
+
+---
+apiVersion: v1                # API version
+kind: Service
+metadata:
+  name: chat-server-service
+  namespace: chat
+  labels:
+    app: chat-server
+spec:
+  type: ClusterIP
+  selector:
+    app: chat-server
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: chat-server-ingress
+  namespace: chat
+  labels:
+    app: chat-server
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  tls:
+  - hosts:
+    - ${K8S_FQDN}
+    secretName: tls-secret
+  rules:
+  - host: ${K8S_FQDN} 
+    http:
+      paths:
+      - backend:
+          serviceName: chat-server-service
+          servicePort: 80
+        path: /chat
+ 
