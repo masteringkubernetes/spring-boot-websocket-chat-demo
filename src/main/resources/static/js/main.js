@@ -7,6 +7,7 @@ var messageForm = document.querySelector('#messageForm');
 var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
+var path = document.location.pathname;
 
 var stompClient = null;
 var username = null;
@@ -23,7 +24,7 @@ function connect(event) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
 
-        var socket = new SockJS('/ws');
+        var socket = new SockJS(path + 'ws');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, onConnected, onError);
