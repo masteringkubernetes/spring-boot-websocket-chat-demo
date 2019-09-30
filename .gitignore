@@ -1,5 +1,7 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
+.azureauth
+settings.xml
 
 ### STS ###
 .apt_generated
